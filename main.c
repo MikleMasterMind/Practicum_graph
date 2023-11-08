@@ -1,13 +1,18 @@
 #include <stdio.h>
-#include "graph.h"
+#include "./include/graph.h"
 
 int main() {
     
-    int a = 5;
-    int b = 7;
-    int c = sum(a, b);
+    edge_t edges[2];
+    edges[0].src = 1;
+    edges[0].dest = 2;
+    edges[1].src = 2;
+    edges[1].dest = 3;
 
-    printf("%d", c);
+
+    graph_t* graph = create_graph(edges, 2);
+
+    print_graph(graph);
 
     return 0;
 }
