@@ -31,7 +31,7 @@ void add_dest(graph_t* graph, const int index, const int dest) {
 
     // create new node in dest_list
     dest_t* new = malloc(sizeof(dest_t));
-    new->dest = dest;
+    new->dest_i = dest;
     new->next = NULL;
 
     // first dest
@@ -45,6 +45,23 @@ void add_dest(graph_t* graph, const int index, const int dest) {
         }
         buf->next = new;
     }
+}
+
+//
+node_t* get_node(const graph_t* graph, const int index) {
+
+    node_t* tmp = graph->head;
+
+    if (index == -1) {
+        return NULL;
+    }
+
+    while ((tmp != NULL) && (tmp->index != index)) {
+        tmp = tmp->next;
+    }
+
+    return tmp;
+
 }
 
 // create graph from input data
@@ -101,6 +118,19 @@ graph_t* read_graph() {
     fclose(input);
     #endif
 
+    node_t* node = graph->head;
+    dest_t* to;
+
+    // set pointers
+    while (node != NULL) {
+        to = node->dest_list;
+        while (to != NULL) {
+            to->dest_p = get_node(graph, to->dest_i);
+            to = to->next;
+        }
+        node = node->next;
+    }
+
     return graph;
 }
 
@@ -124,9 +154,9 @@ void print_graph(const graph_t* graph) {
         }
         while (tmp != NULL) {
             #ifdef READ_FROM_FILE
-            fprintf(output, "(%d -> %d) \t", node->index, tmp->dest);
+            fprintf(output, "(%d -> %d) \t", node->index, tmp->dest_i);
             #else
-            printf("(%d -> %d) \t", node->index, tmp->dest);
+            printf("(%d -> %d) \t", node->index, tmp->dest_i);
             #endif
             tmp = tmp->next;
         }
