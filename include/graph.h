@@ -3,30 +3,33 @@
 
 #include<stdio.h>
 #include<stdbool.h>
+#include<stdlib.h>
 
 
-typedef struct {
-    int src, dest; // edge: src -> dest
-} edge_t;
+struct dest_t {
+    int dest;
+    struct dest_t* next;
+};
+typedef struct dest_t dest_t;
 
 struct node_t {
     struct node_t* next;
-    int dest;
+    dest_t* dest_list;
     int index;
+    bool used;
+    int tout;
 };
 typedef struct node_t node_t;
 
 typedef struct {
-    int num; // amount nodes
     node_t* head; // first node
     node_t* end; // last node
 } graph_t;
-
-void get_edges(edge_t**);
 
 graph_t* read_graph();
 
 void print_graph(const graph_t*);
 
+void delete_graph(graph_t*);
 
 #endif
