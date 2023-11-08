@@ -1,10 +1,10 @@
 #ifndef ALGORITHM_INCLUDED
 #define ALGORITHM_INCLUDED
 
-#include"graph.h"
+#include "graph.h"
 
-void set_number_out_node(const graph_t*, node_t*, int);
+void set_number_out_graph(graph_t*);
 
-void print_nodes_by_out(const graph_t*);
+void print_numbered_graph(const graph_t*);
 
 #endif

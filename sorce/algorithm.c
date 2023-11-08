@@ -1,65 +1,65 @@
 #include "../include/algorithm.h"
 #include "../include/graph.h"
 
-void set_out(const graph_t* graph, const int index, const int out) {
-    node_t* tmp = graph->head;
+#define READ_FROM_FILE
 
+// recursive function process nodes by one
+void set_number_out_node(graph_t* graph, node_t* node, int* count) {
+    
+    if ((node != NULL) && !(node->used)) {
+        node->used = true;
+        dest_t* to = node->dest_list;
+        while (to != NULL) {
+            set_number_out_node(graph, to->dest_p, count);
+            to = to->next;
+        }
+        node->tout = *count;
+        ++(*count);
+    }
+
+}
+
+// set tout to every nodes by using set_number_out_node
+void set_number_out_graph(graph_t* graph) {
+    
+    node_t* tmp = graph->head;
+    dest_t* to;
+    int count = 0;
     while (tmp != NULL) {
-        if (tmp->index == index) {
-            tmp->tout = out;
+        if (!(tmp->used)) {
+            tmp->used = true;
+            to = tmp->dest_list;
+            while (to != NULL) {
+                set_number_out_node(graph, to->dest_p, &count);
+                to = to->next;
+            }
+            tmp->tout = count;
+            ++count;          
         }
-
-        tmp = tmp->next;
+        tmp = tmp->next;  
     }
 }
 
-node_t* get_node(const graph_t* graph, const int index) {
-    node_t* tmp = graph->head;
+void print_numbered_graph(const graph_t* graph) {
+    #ifdef READ_FROM_FILE
+    FILE* output = fopen("output.txt", "a");
+    #endif
 
-    if (index == -1) {
-        return NULL;
+    node_t* node = graph->head;
+
+    while (node != NULL) {
+        
+        #ifdef READ_FROM_FILE
+        fprintf(output, "(%d) out = %d \n", node->index, node->tout);
+        #else
+        printf("(%d out = %d) \n", node->index, node->tout);
+        #endif
+        node =  node->next;
     }
 
-    while (tmp->index != index) {
-        tmp = tmp->next;
-    }
-
-    return tmp;
+    #ifdef READ_FROM_FILE
+    fprintf(output, "\n");
+    fclose(output);
+    #endif
 }
 
-void set_number_out_node(const graph_t* graph, node_t* node, int count) {
-    if (node == NULL) {
-        return;
-    }
-    node_t* next_node = get_node(graph, node->dest);
-    set_number_out_node(graph, next_node, count);
-    set_out(graph, node->index, count);
-    ++count;
-    return;
-}
-
-int get_index_by_out(const graph_t* graph, int out) {
-    node_t* tmp = graph->head;
-
-    while ((tmp != NULL) && (tmp->tout != out)) {
-        tmp = tmp->next;
-    }
-
-    if (tmp == NULL) {
-        return -1;
-    } else {
-        return tmp->index;
-    }
-
-}
-
-void print_nodes_by_out(const graph_t* graph) {
-    int index;
-    for (int count = 0; ; ++count) {
-        index = get_index_by_out(graph, count);
-        if (index == -1) {
-            break;
-        }
-        printf("%d\n", index);
-    }
-}

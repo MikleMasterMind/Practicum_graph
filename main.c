@@ -10,12 +10,11 @@ int main() {
 
     print_graph(graph);
 
+    set_number_out_graph(graph);
+
+    print_numbered_graph(graph);
+
     delete_graph(graph);
-
-    // int count = 0;
-    // set_number_out_node(graph, graph->head, count);
-
-    // print_nodes_by_out(graph);
 
     return 0;
 }

@@ -7,8 +7,9 @@
 
 
 struct dest_t {
-    int dest;
+    int dest_i;
     struct dest_t* next;
+    struct node_t* dest_p;
 };
 typedef struct dest_t dest_t;
 
