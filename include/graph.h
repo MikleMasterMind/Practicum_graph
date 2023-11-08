@@ -22,8 +22,9 @@ typedef struct {
     node_t* end; // last node
 } graph_t;
 
+void get_edges(edge_t**);
 
-graph_t* create_graph(edge_t[], const int);
+graph_t* read_graph();
 
 void print_graph(const graph_t*);
 

@@ -2,6 +2,8 @@
 #include<stdio.h>
 #include "../include/graph.h"
 
+#define READ_FROM_FILE
+
 void add_node(graph_t* graph, node_t* new) {
     //first node
     if (graph->num == 0) {
@@ -17,26 +19,59 @@ void add_node(graph_t* graph, node_t* new) {
 
 // create graph from given edges
 // graph is stored as adjacency list
-graph_t* create_graph(edge_t edges[], int N) {
-    
-    // get memory for graph
-    // at first graph has place for 10 nodes
+graph_t* read_graph() {
+
+    // amount of nodes
+    int N; 
+    #ifdef READ_FROM_FILE
+    FILE* input = fopen("input.txt", "r");
+    fscanf(input, "%d", &N);
+    #else
+    scanf("%d", &N);
+    #endif
+
+    // init graph
     graph_t* graph = malloc(sizeof(graph_t));
     graph->num = 0;
     graph->head = NULL;
     graph->end = NULL;
 
-    for (int i = 0; i < N; ++i) {
+    // add edges to graph by one
+    int k, dest;
+    for (int src = 1; src <= N; ++src) {
 
-        // get new node adjacency list
-        node_t* newnode  = malloc(sizeof(node_t));
-        
-        // point out new node to node src
-        newnode->index = edges[i].src;
-        newnode->dest = edges[i].dest;
+        #ifdef READ_FROM_FILE
+        fscanf(input, "%d", &k);
+        #else
+        scanf("%d", &k); // amount of edges
+        #endif
 
-        add_node(graph, newnode);
+        // no arcs go from node
+        if (k == 0) {
+            node_t* newnode  = malloc(sizeof(node_t));
+            newnode->index = src;
+            newnode->dest = -1;
+            add_node(graph, newnode);
+        } else {
+            for (int i = 0; i < k; ++i) {
+
+                #ifdef READ_FROM_FILE
+                fscanf(input, "%d", &dest);
+                #else
+                scanf("%d", &dest); // amount of edges
+                #endif
+
+                node_t* newnode  = malloc(sizeof(node_t));
+                newnode->index = src;
+                newnode->dest = dest;
+                add_node(graph, newnode);
+            }
+        }
     }
+
+    #ifdef READ_FROM_FILE
+    fclose(input);
+    #endif
 
     return graph;
 }
@@ -44,15 +79,33 @@ graph_t* create_graph(edge_t edges[], int N) {
 // print graph
 void print_graph(const graph_t* graph) {
 
+    #ifdef READ_FROM_FILE
+    FILE* output = fopen("output.txt", "a");
+    #endif
+
     node_t* tmp = graph->head;
     int prev = -1;
 
     while (tmp != NULL) {
-        printf("(%d -> %d) \t", tmp->index, tmp->dest);
+        #ifdef READ_FROM_FILE
+        if (prev != tmp->index) {
+            fprintf(output, "\n");
+            prev = tmp->index;
+        }
+        fprintf(output, "(%d -> %d) \t", tmp->index, tmp->dest);
+        tmp = tmp->next;
+        #else
         if (prev != tmp->index) {
             printf("\n");
             prev = tmp->index;
         }
+        printf("(%d -> %d) \t", tmp->index, tmp->dest);
         tmp = tmp->next;
+        #endif
     }
+
+    #ifdef READ_FROM_FILE
+    fprintf(output, "\n");
+    fclose(output);
+    #endif
 }
