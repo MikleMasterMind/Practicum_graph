@@ -7,16 +7,18 @@ void add_node(graph_t* graph, node_t* new) {
     // first node
     if (graph->head == NULL) {
         graph->head = new;
-    } else {
+    } 
+    // not first => add to end
+    else {
         graph->end->next = new;
     }
     graph->end = new;
-    graph->end->dest_list = NULL;
     graph->end->next = NULL;
 }
 
 // add new dest to 
 void add_dest(graph_t* graph, const int index, const int dest) {
+
     node_t* tmp = graph->head;
 
     // find node
@@ -37,7 +39,9 @@ void add_dest(graph_t* graph, const int index, const int dest) {
     // first dest
     if (tmp->dest_list == NULL) {
         tmp->dest_list = new;
-    } else {
+    } 
+    // not first => add to end
+    else {
         dest_t* buf = tmp->dest_list;
         // go to the end of list
         while (buf->next != NULL) {
@@ -52,10 +56,12 @@ node_t* get_node(const graph_t* graph, const int index) {
 
     node_t* tmp = graph->head;
 
+    // no nodes with this index
     if (index == -1) {
         return NULL;
     }
 
+    // go until end or find node
     while ((tmp != NULL) && (tmp->index != index)) {
         tmp = tmp->next;
     }
@@ -82,10 +88,12 @@ graph_t* read_graph() {
     graph->head = NULL;
     graph->end = NULL;
 
-    // add edges to graph by one
+    // read and add edges to graph by one
+    // if no egdes => add -1
     int k, dest;
     for (int src = 1; src <= N; ++src) {
 
+        // amount of destinations
         #ifdef READ_FROM_FILE
         fscanf(input, "%d", &k);
         #else
@@ -93,17 +101,17 @@ graph_t* read_graph() {
         #endif
 
         // create new node
-        node_t* newnode  = malloc(sizeof(node_t));
+        node_t* newnode = malloc(sizeof(node_t));
         newnode->index = src;
         newnode->dest_list = NULL;
-        newnode->next = NULL;
         newnode->tout = -1;
         newnode->used = false;
         add_node(graph, newnode);
 
         // add destinations
         for (int i = 0; i < k; ++i) {
-
+            
+            // read dest index
             #ifdef READ_FROM_FILE
             fscanf(input, "%d", &dest);
             #else
@@ -134,20 +142,68 @@ graph_t* read_graph() {
     return graph;
 }
 
+//
+graph_t* get_transposed_graph(const graph_t* graph) {
+
+    // init new graph
+    graph_t* trans = malloc(sizeof(graph_t));
+    trans->head = NULL;
+    trans->end = NULL;
+
+    // copy nodes
+    node_t* node = graph->head;
+    node_t* new;
+    while (node != NULL) {
+        new = malloc(sizeof(node_t));
+        *new = *node;
+        new->used = false;
+        new->dest_list = NULL;
+        add_node(trans, new);
+        node = node->next;
+    }
+
+    // add destinations
+    node = graph->head;
+    dest_t* to;
+    while (node != NULL) {
+        to = node->dest_list;
+        while (to != NULL) {
+            add_dest(trans, to->dest_i, node->index);
+            to = to->next;
+        }
+        node = node->next;
+    }
+
+    //set pointers
+    node = trans->head;
+    while (node != NULL) {
+        to = node->dest_list;
+        while (to != NULL) {
+            to->dest_p = get_node(trans, to->dest_i);
+            to = to->next;
+        }
+        node = node->next;
+    }
+    
+    return trans;
+}
+
 // print graph
 void print_graph(const graph_t* graph) {
 
     #ifdef READ_FROM_FILE
-    FILE* output = fopen("output.txt", "w");
+    FILE* output = fopen("output.txt", "a");
     #endif
 
     node_t* node = graph->head;
 
+    // go trow list and print edges from one node in one line
     while (node != NULL) {
         dest_t* tmp = node->dest_list;
+        // no arc from node
         if (tmp == NULL) {
             #ifdef READ_FROM_FILE
-            fprintf(output, "(%d -> -1) \t", node->index);
+            fprintf(output, "(%d -> -1)", node->index);
             #else
             printf("(%d -> -1) \t", node->index);
             #endif
@@ -192,18 +248,4 @@ void delete_graph(graph_t* graph) {
         free(node);
     }
     free(graph);
-}
-
-// return first not used edge from node <index>
-// if all edges used return NULL
-node_t* get_no_used_node(const graph_t* graph, const int index) {
-    node_t* tmp = graph->head;
-
-    while ((tmp != NULL) && (tmp->index != index) && !(tmp->used)) {
-        tmp= tmp->next;
-    }
-
-    tmp->used = true;
-
-    return tmp;
 }

@@ -14,7 +14,15 @@ int main() {
 
     print_numbered_graph(graph);
 
+    graph_t* transposed_graph = get_transposed_graph(graph);
+
+    print_graph(transposed_graph);
+
+    print_numbered_graph(transposed_graph);
+
     delete_graph(graph);
+
+    delete_graph(transposed_graph);
 
     return 0;
 }

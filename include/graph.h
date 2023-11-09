@@ -29,6 +29,8 @@ typedef struct {
 
 graph_t* read_graph();
 
+graph_t* get_transposed_graph(const graph_t*);
+
 void print_graph(const graph_t*);
 
 void delete_graph(graph_t*);
