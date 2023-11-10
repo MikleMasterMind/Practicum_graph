@@ -4,14 +4,12 @@
 #define READ_FROM_FILE
 
 // recursive function process nodes by one
-void set_number_out_node(graph_t* graph, node_t* node, int* count) {
+void set_number_out_node(node_t* node, int* count) {
     
     if ((node != NULL) && !(node->used)) {
         node->used = true;
-        dest_t* to = node->dest_list;
-        while (to != NULL) {
-            set_number_out_node(graph, to->dest_p, count);
-            to = to->next;
+        for (dest_t* to = node->dest_list; to != NULL; to = to->next) {
+            set_number_out_node(to->dest_p, count);
         }
         node->tout = *count;
         ++(*count);
@@ -22,36 +20,29 @@ void set_number_out_node(graph_t* graph, node_t* node, int* count) {
 // set tout to every nodes by using set_number_out_node
 void set_number_out_graph(graph_t* graph) {
     
-    node_t* tmp = graph->head;
-    dest_t* to;
     int count = 1;
-    while (tmp != NULL) {
+
+    for (node_t* tmp = graph->head; tmp != NULL; tmp = tmp->next) {
         if (!(tmp->used)) {
             tmp->used = true;
-            to = tmp->dest_list;
-            while (to != NULL) {
-                set_number_out_node(graph, to->dest_p, &count);
-                to = to->next;
+            for (dest_t* to = tmp->dest_list; to != NULL; to = to->next) {
+                set_number_out_node(to->dest_p, &count);
             }
             tmp->tout = count;
             ++count;          
-        }
-        tmp = tmp->next;  
+        } 
     }
 }
 
 // all nodes -> used = false
 void unset_used_nodes(graph_t* graph) {
-    
-    node_t* tmp = graph->head;
-    while (tmp != NULL) {
+    for (node_t* tmp = graph->head; tmp != NULL; tmp = tmp->next) {
         tmp->used = false;
-        tmp = tmp->next;
     }
 }
 
 //
-void mark_dest_list(graph_t* graph, node_t* node) {
+void mark_dest_list(node_t* node) {
 
     //  emtpy node or cycle
     if ((node == NULL) || (node->used)) {
@@ -60,18 +51,16 @@ void mark_dest_list(graph_t* graph, node_t* node) {
 
     // midified node
     node->used = true;
-    dest_t* to = node->dest_list;
 
-    while (to != NULL) {
-        mark_dest_list(graph, to->dest_p);
-        to = to->next;
+    for (dest_t* to = node->dest_list; to != NULL; to = to->next) {
+        mark_dest_list(to->dest_p);
     }
 }
 
 // return amount of strong components
 int count_strong_components(graph_t* graph, const int N) {
 
-    int count = 0; // amount of strong components
+    int count = 0; // result to return
     
     node_t* node;
     dest_t* to;
@@ -88,10 +77,81 @@ int count_strong_components(graph_t* graph, const int N) {
         // count strong component
         if ((node != NULL ) && !(node->used)) {
             ++count;
-            mark_dest_list(graph, node);
+            mark_dest_list(node);
         }
     }
 
+    return count;
+}
+
+// return amount of weak components
+int count_weak_components(graph_t* graph) {
+    
+    int count = 0; // result to return
+
+    for (node_t* node = graph->head; node != NULL; node = node->next) {
+        if (!(node->used)) {
+            ++count;
+            mark_dest_list(node);
+        }
+    }
+
+    return count;
+}
+
+// check if possible build way node -> index using dfs
+bool can_get_way(node_t* node, const int index) {
+    if ((node == NULL) || (node->used)) {
+        return false;
+    } else if (node->index == index) {
+        return true;
+    } else {
+        node->used = true;
+        for (dest_t* to = node->dest_list; to != NULL; to = to->next) {
+            if (can_get_way(to->dest_p, index)) { return true; }
+        }
+        return false;
+    }
+}
+
+// return amount of strong bridges
+int count_strong_bridges(graph_t* graph) {
+    
+    int count = 0; // result to return
+
+    // cycle on nodes
+    for (node_t* node = graph->head; node != NULL; node = node->next) {
+
+        // single arc
+        unset_used_nodes(graph);
+        if ((node->dest_list != NULL) && (node->dest_list->next == NULL) && (can_get_way(node->dest_list->dest_p, node->index))) {
+            ++count;
+            continue;
+        }
+        
+        // cycle on dest_list
+        for (dest_t* to = node->dest_list; to != NULL; to = to->next) {
+
+            // check if dest is in cycle
+            unset_used_nodes(graph);
+            if (!can_get_way(to->dest_p, node->index)) { continue; }
+
+            // cycle on dest_list exsept to
+            for (dest_t* p = node->dest_list; p != NULL; p = p->next) {
+                
+                // got dest <to> => skip
+                if (p == to) { continue; }
+
+                // can't get way without arc <to>
+                unset_used_nodes(graph);
+                node->used = true;
+                if (!can_get_way(p->dest_p, to->dest_i)) {
+                    ++count;
+                    break;
+                }
+            }
+        }
+    }
     return count;
 }
 
@@ -101,16 +161,13 @@ void print_numbered_graph(const graph_t* graph) {
     FILE* output = fopen("output.txt", "a");
     #endif
 
-    node_t* node = graph->head;
-
-    while (node != NULL) {
+    for (node_t* node = graph->head; node != NULL; node =  node->next) {
         
         #ifdef READ_FROM_FILE
         fprintf(output, "(%d) out = %d \n", node->index, node->tout);
         #else
         printf("(%d out = %d) \n", node->index, node->tout);
         #endif
-        node =  node->next;
     }
 
     #ifdef READ_FROM_FILE

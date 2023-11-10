@@ -125,17 +125,11 @@ graph_t* read_graph() {
     fclose(input);
     #endif
 
-    node_t* node = graph->head;
-    dest_t* to;
-
     // set pointers
-    while (node != NULL) {
-        to = node->dest_list;
-        while (to != NULL) {
+    for (node_t* node = graph->head; node != NULL; node = node->next) {
+        for (dest_t* to = node->dest_list; to != NULL; to = to->next) {
             to->dest_p = get_node(graph, to->dest_i);
-            to = to->next;
         }
-        node = node->next;
     }
 
     return graph;
@@ -194,10 +188,10 @@ void print_graph(const graph_t* graph) {
     FILE* output = fopen("output.txt", "a");
     #endif
 
-    node_t* node = graph->head;
+    
 
     // go trow list and print edges from one node in one line
-    while (node != NULL) {
+    for (node_t* node = graph->head; node != NULL; node =  node->next) {
         dest_t* tmp = node->dest_list;
         // no arc from node
         if (tmp == NULL) {
@@ -207,20 +201,18 @@ void print_graph(const graph_t* graph) {
             printf("(%d -> -1) \t", node->index);
             #endif
         }
-        while (tmp != NULL) {
+        for ( ; tmp != NULL; tmp = tmp->next) {
             #ifdef READ_FROM_FILE
             fprintf(output, "(%d -> %d) \t", node->index, tmp->dest_i);
             #else
             printf("(%d -> %d) \t", node->index, tmp->dest_i);
             #endif
-            tmp = tmp->next;
         }
         #ifdef READ_FROM_FILE
         fprintf(output, "\n");
         #else
         printf("\n");
         #endif
-        node =  node->next;
     }
 
     #ifdef READ_FROM_FILE
