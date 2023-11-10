@@ -2,23 +2,39 @@
 #include "./include/graph.h"
 #include "./include/algorithm.h"
 
+#define READ_FROM_FILE
+
 
 
 int main() {
 
-    graph_t* graph = read_graph();
+    // amount of nodes
+    int N;
+    #ifdef READ_FROM_FILE
+    FILE* input = fopen("input.txt", "r");
+    fscanf(input, "%d", &N);
+    fclose(input);
+    #else
+    scanf("%d", &N);
+    #endif
 
-    print_graph(graph);
+    graph_t* graph = read_graph();
 
     set_number_out_graph(graph);
 
-    print_numbered_graph(graph);
-
     graph_t* transposed_graph = get_transposed_graph(graph);
 
-    print_graph(transposed_graph);
+    unset_used_nodes(transposed_graph);
 
-    print_numbered_graph(transposed_graph);
+    int count = count_strong_components(transposed_graph, N);
+
+    #ifdef READ_FROM_FILE
+    FILE* output = fopen("output.txt", "a");
+    fprintf(output, "%d\n", count);
+    fclose(output);
+    #else
+    printf("%d\n", &n);
+    #endif
 
     delete_graph(graph);
 

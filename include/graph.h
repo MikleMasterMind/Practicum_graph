@@ -27,12 +27,17 @@ typedef struct {
     node_t* end; // last node
 } graph_t;
 
+// create graph from input data
+// graph is stored as list of nodes with pointers to lists of destinations
 graph_t* read_graph();
 
+// return transposed graph
 graph_t* get_transposed_graph(const graph_t*);
 
+// print graph
 void print_graph(const graph_t*);
 
+// free memory form graph
 void delete_graph(graph_t*);
 
 #endif

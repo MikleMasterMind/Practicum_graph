@@ -16,7 +16,7 @@ void add_node(graph_t* graph, node_t* new) {
     graph->end->next = NULL;
 }
 
-// add new dest to 
+// add new dest to node in graph
 void add_dest(graph_t* graph, const int index, const int dest) {
 
     node_t* tmp = graph->head;
@@ -51,7 +51,7 @@ void add_dest(graph_t* graph, const int index, const int dest) {
     }
 }
 
-//
+// return pointer to node of graph
 node_t* get_node(const graph_t* graph, const int index) {
 
     node_t* tmp = graph->head;
@@ -104,7 +104,6 @@ graph_t* read_graph() {
         node_t* newnode = malloc(sizeof(node_t));
         newnode->index = src;
         newnode->dest_list = NULL;
-        newnode->tout = -1;
         newnode->used = false;
         add_node(graph, newnode);
 
@@ -142,7 +141,7 @@ graph_t* read_graph() {
     return graph;
 }
 
-//
+// return transposed graph
 graph_t* get_transposed_graph(const graph_t* graph) {
 
     // init new graph
