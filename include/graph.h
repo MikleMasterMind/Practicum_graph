@@ -35,6 +35,9 @@ graph_t* read_graph();
 // return transposed graph
 graph_t* get_transposed_graph(const graph_t*);
 
+//
+graph_t* get_undirected_graph(const graph_t*, const graph_t*);
+
 // print graph
 void print_graph(const graph_t*);
 

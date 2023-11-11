@@ -181,6 +181,61 @@ graph_t* get_transposed_graph(const graph_t* graph) {
     return trans;
 }
 
+//
+graph_t* get_undirected_graph(const graph_t* graph1, const graph_t* graph2) {
+
+    // init graph
+    graph_t* undir = malloc(sizeof(graph_t));
+    undir->head = NULL;
+    undir->end = NULL;
+
+    // copy nodes
+    node_t* node = graph1->head;
+    node_t* new;
+    while (node != NULL) {
+        new = malloc(sizeof(node_t));
+        *new = *node;
+        new->used = false;
+        new->dest_list = NULL;
+        add_node(undir, new);
+        node = node->next;
+    }
+
+    // add destinations
+    node = graph1->head;
+    dest_t* to;
+    while (node != NULL) {
+        to = node->dest_list;
+        while (to != NULL) {
+            add_dest(undir, to->dest_i, node->index);
+            to = to->next;
+        }
+        node = node->next;
+    }
+    node = graph2->head;
+    while (node != NULL) {
+        to = node->dest_list;
+        while (to != NULL) {
+            add_dest(undir, to->dest_i, node->index);
+            to = to->next;
+        }
+        node = node->next;
+    }
+
+    //set pointers
+    node = undir->head;
+    while (node != NULL) {
+        to = node->dest_list;
+        while (to != NULL) {
+            to->dest_p = get_node(undir, to->dest_i);
+            to = to->next;
+        }
+        node = node->next;
+    }
+    
+    return undir;
+}
+
 // print graph
 void print_graph(const graph_t* graph) {
 
