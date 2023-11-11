@@ -19,7 +19,7 @@ int count_weak_components(graph_t*, graph_t*);
 int count_strong_bridges(graph_t*);
 
 // return amount of weak bridges
-void count_weak_bridges(node_t*, const int, int*, int*);
+int count_weak_bridges(graph_t*);
 
 // print node index and it's tout
 void print_numbered_graph(const graph_t*);

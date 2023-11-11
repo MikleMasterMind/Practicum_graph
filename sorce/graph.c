@@ -41,12 +41,10 @@ void add_dest(graph_t* graph, const int index, const int dest) {
         tmp->dest_list = new;
     } 
     // not first => add to end
-    else {
-        dest_t* buf = tmp->dest_list;
+    else {  
         // go to the end of list
-        while (buf->next != NULL) {
-            buf = buf->next;
-        }
+        dest_t* buf;
+        for (buf = tmp->dest_list; buf->next != NULL; buf = buf->next) {}
         buf->next = new;
     }
 }
