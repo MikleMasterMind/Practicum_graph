@@ -18,7 +18,8 @@ struct node_t {
     dest_t* dest_list;
     int index;
     bool used;
-    int tout;
+    int time1;
+    int time2;
 };
 typedef struct node_t node_t;
 

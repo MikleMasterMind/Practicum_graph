@@ -28,21 +28,30 @@ int main() {
     unset_used_nodes(transposed_graph);
 
     int strong_components = count_strong_components(transposed_graph, N);
-    graph = get_transposed_graph(transposed_graph);
-    int strong_bridges = count_strong_bridges(graph);
-    unset_used_nodes(graph);
-    int weak_components = count_weak_components(graph);
+    unset_used_nodes(transposed_graph);
+    int weak_components = count_weak_components(graph, transposed_graph);
 
+    // delete_graph(graph);
+    // graph = get_transposed_graph(transposed_graph);
+    // unset_used_nodes(graph);
+    // int strong_bridges = count_strong_bridges(graph);
+    // unset_used_nodes(graph);
+    // unset_used_nodes(graph);
+    // int buf = 1;
+    // int weak_bridges = 0;
+    // count_weak_bridges(graph->head, -1, &buf, &weak_bridges);
+
+    // delete_graph(transposed_graph);
+    // delete_graph(graph);
+    
     #ifdef READ_FROM_FILE
     FILE* output = fopen("output.txt", "a");
-    fprintf(output, "%d %d\n%d\n\n", strong_components, strong_bridges, weak_components);
+    fprintf(output, "%d %d\n", strong_components, weak_components);
+    //fprintf(output, "%d %d\n%d %d\n----\n", strong_components, strong_bridges, weak_components, weak_bridges);
     fclose(output);
     #else
     printf("%d\n", &n);
     #endif
-
-    delete_graph(graph);
-    delete_graph(transposed_graph);
 
     return 0;
 }

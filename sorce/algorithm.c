@@ -4,33 +4,48 @@
 #define READ_FROM_FILE
 
 // recursive function process nodes by one
-void set_number_out_node(node_t* node, int* count) {
+void set_number_out_node(node_t* node, int* timer) {
     
     if ((node != NULL) && !(node->used)) {
         node->used = true;
         for (dest_t* to = node->dest_list; to != NULL; to = to->next) {
-            set_number_out_node(to->dest_p, count);
+            set_number_out_node(to->dest_p, timer);
         }
-        node->tout = *count;
-        ++(*count);
+        node->time1 = *timer;
+        ++(*timer);
     }
 
 }
 
-// set tout to every nodes by using set_number_out_node
+// set time1 to every nodes by using set_number_out_node
 void set_number_out_graph(graph_t* graph) {
     
-    int count = 1;
+    int timer = 1;
 
     for (node_t* tmp = graph->head; tmp != NULL; tmp = tmp->next) {
         if (!(tmp->used)) {
             tmp->used = true;
             for (dest_t* to = tmp->dest_list; to != NULL; to = to->next) {
-                set_number_out_node(to->dest_p, &count);
+                set_number_out_node(to->dest_p, &timer);
             }
-            tmp->tout = count;
-            ++count;          
+            tmp->time1 = timer;
+            ++timer;          
         } 
+    }
+}
+
+// check if possible build way node -> index using dfs
+bool can_get_way(node_t* node, const int index) {
+    if ((node == NULL) || (node->used)) {
+        return false;
+    } else if (node->index == index) {
+        return true;
+    } else {
+        node->used = true;
+        for (dest_t* to = node->dest_list; to != NULL; to = to->next) {
+            if (can_get_way(to->dest_p, index)) { return true; }
+        }
+        return false;
     }
 }
 
@@ -69,8 +84,8 @@ int count_strong_components(graph_t* graph, const int N) {
 
         node = graph->head;
         
-        // get node by tout
-        while ((node != NULL) && (node->tout != i)) {
+        // get node by time1
+        while ((node != NULL) && (node->time1 != i)) {
             node = node->next;
         }
 
@@ -85,36 +100,31 @@ int count_strong_components(graph_t* graph, const int N) {
 }
 
 // return amount of weak components
-int count_weak_components(graph_t* graph) {
+//  FIX
+int count_weak_components(graph_t* graph, graph_t* trans) {
     
     int count = 0; // result to return
 
-    for (node_t* node = graph->head; node != NULL; node = node->next) {
-        if (!(node->used)) {
+    node_t* node1 = graph->head;
+    node_t* node2 = trans->head;
+
+    while (node1 != NULL) {
+
+        if (!(node1->used) && !(node2->used)) {
             ++count;
-            mark_dest_list(node);
+            mark_dest_list(node1);
+            mark_dest_list(node2);
         }
+
+        node1 = node1->next;
+        node2 = node2->next;
     }
 
     return count;
 }
 
-// check if possible build way node -> index using dfs
-bool can_get_way(node_t* node, const int index) {
-    if ((node == NULL) || (node->used)) {
-        return false;
-    } else if (node->index == index) {
-        return true;
-    } else {
-        node->used = true;
-        for (dest_t* to = node->dest_list; to != NULL; to = to->next) {
-            if (can_get_way(to->dest_p, index)) { return true; }
-        }
-        return false;
-    }
-}
-
 // return amount of strong bridges
+// FIX
 int count_strong_bridges(graph_t* graph) {
     
     int count = 0; // result to return
@@ -155,7 +165,34 @@ int count_strong_bridges(graph_t* graph) {
     return count;
 }
 
-// print node index and it's tout
+// return amount of weak bridges
+// FIX
+void count_weak_bridges(node_t* node, const int prev, int* timer, int *count) {
+
+    node->used = true;
+    node->time1 = node->time2 = *(timer)++;
+
+    for (dest_t* to = node->dest_list; to != NULL; to = to->next) {
+        // skip previous
+        if (to->dest_i == prev) {
+            continue;
+        }
+        // met cycle
+        else if (to->dest_p->used) {
+            node->time2 = (node->time2 > to->dest_p->time1) ? to->dest_p->time1 : node->time2;
+        } else {
+            count_weak_bridges(to->dest_p, node->index, timer, count);
+            node->time2 = (node->time2 > to->dest_p->time2) ? to->dest_p->time2 : node->time2;
+
+            // bridge
+            if (node->time1 < to->dest_p->time2) {
+                ++(*count);
+            }
+        }
+    }
+}
+
+// print node index and it's time1
 void print_numbered_graph(const graph_t* graph) {
     #ifdef READ_FROM_FILE
     FILE* output = fopen("output.txt", "a");
@@ -164,9 +201,9 @@ void print_numbered_graph(const graph_t* graph) {
     for (node_t* node = graph->head; node != NULL; node =  node->next) {
         
         #ifdef READ_FROM_FILE
-        fprintf(output, "(%d) out = %d \n", node->index, node->tout);
+        fprintf(output, "(%d) out = %d \n", node->index, node->time1);
         #else
-        printf("(%d out = %d) \n", node->index, node->tout);
+        printf("(%d out = %d) \n", node->index, node->time1);
         #endif
     }
 
