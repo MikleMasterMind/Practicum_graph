@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "graph.h"
-#include "algorithm.h"
+#include "lib/graph.h"
+#include "lib/algorithm.h"
 
 
 int main() {
